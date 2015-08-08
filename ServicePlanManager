@@ -1,0 +1,92 @@
+public class ServicePlanManager {
+
+public static void setProgramEndDates() {
+
+    // Collect hhs__Service_Plan__c records with populated dates
+    List<hhs__Service_Plan__c> changedServicePlans = new List<hhs__Service_Plan__c>();
+    Set<Id> programIntakeIds = new Set<Id>();
+    for (sObject obj: trigger.new) {
+        hhs__Service_Plan__c sp = (hhs__Service_Plan__c) obj;
+        hhs__Service_Plan__c oldSp = (hhs__Service_Plan__c) trigger.oldMap.get(obj.Id);
+        
+        if (sp.inw_Program_Exit_Date__c != null &&
+            sp.inw_Program_Exit_Date__c != oldSp.inw_Program_Exit_Date__c) {
+            changedServicePlans.add(sp);
+            if (sp.hhs__Program_Intake__c != null) programIntakeIds.add(sp.hhs__Program_Intake__c);
+        }
+    }
+
+    // Get parent hhs__Program_Intake__c records
+    Map<Id, hhs__Program_Intake__c> programIntakes = new Map<Id, hhs__Program_Intake__c>(
+    [SELECT Id, hhs__Intake_Status__c, inw_Program_Exit_Date__c 
+     FROM hhs__Program_Intake__c
+     WHERE Id IN :programIntakeIds]
+    );
+
+    // Get service recipients per program intakes
+    Service_Recipient__c[] recipientList = [SELECT Id, inw_Program_Intake__c, inw_Program_Exit_Date__c 
+                                                FROM Service_Recipient__c 
+                                                WHERE inw_Program_Intake__c IN :programIntakeids];
+    Map<Id, List<Service_Recipient__c>> recipientsPerProgramIntake = new Map<Id, List<Service_Recipient__c>>();
+    for(Service_Recipient__c sr: recipientList) {
+        if (!recipientsPerProgramIntake.containsKey(sr.inw_Program_Intake__c ))
+            recipientsPerProgramIntake.put(sr.inw_Program_Intake__c, new List<Service_Recipient__c>());
+        recipientsPerProgramIntake.get(sr.inw_Program_Intake__c).add(sr);
+    }
+    
+    // Get service codes per program intakes
+    Service_Code__c[] codeList = [SELECT Id, inw_Program_Intake__c, inw_Service_Code_End_Date__c 
+                                    FROM Service_Code__c 
+                                    WHERE inw_Program_Intake__c IN :programIntakeids];
+    Map<Id, List<Service_Code__c>> codesPerProgramIntake = new Map<Id, List<Service_Code__c>>();
+    for(Service_Code__c sc: codeList) {
+        if (!codesPerProgramIntake.containsKey(sc.inw_Program_Intake__c ))
+            codesPerProgramIntake.put(sc.inw_Program_Intake__c, new List<Service_Code__c>());
+        codesPerProgramIntake.get(sc.inw_Program_Intake__c).add(sc);
+    }
+    
+    // Initialize lists of objects to be updated
+    hhs__Program_Intake__c[] programIntakesToUpdate = new List<hhs__Program_Intake__c>();
+    Service_Recipient__c[] serviceRecipientsToUpdate = new List<Service_Recipient__c >();
+    Service_Code__c[] serviceCodesToUpdate = new List<Service_Code__c>();
+    
+    
+    // For each updated service record
+    for (hhs__Service_Plan__c  sp : changedServicePlans) {
+        // If this Service Plan should set all end dates
+        if (sp.Set_All_End_Dates__c &&
+            programIntakes.containsKey(sp.hhs__Program_Intake__c)) {
+            
+            // Get Parent Program Intake record, mark closed and set end date if null
+            hhs__Program_Intake__c currentProgramIntake = programIntakes.get(sp.hhs__Program_Intake__c);
+            currentProgramIntake.hhs__Intake_Status__c = 'Closed';
+            currentProgramIntake.inw_Program_Exit_Date__c = sp.inw_Program_Exit_Date__c;
+            programIntakesToUpdate.add(currentProgramIntake);
+            
+            // Set end date on service recipients for this program intake
+            if (recipientsPerProgramIntake.containsKey(sp.hhs__Program_Intake__c)) {
+                for (Service_Recipient__c sr : recipientsPerProgramIntake.get(sp.hhs__Program_Intake__c)) {
+                    if (sr.inw_Program_Exit_Date__c == null) {
+                        sr.inw_Program_Exit_Date__c = sp.inw_Program_Exit_Date__c;
+                        serviceRecipientsToUpdate.add(sr);
+                    }
+                }
+            }
+            
+            // Set end date on service codes for this program intake
+            if (codesPerProgramIntake.containsKey(sp.hhs__Program_Intake__c)) {
+                for (Service_Code__c sc : codesPerProgramIntake.get(sp.hhs__Program_Intake__c)) {
+                    if (sc.inw_Service_Code_End_Date__c == null) {
+                        sc.inw_Service_Code_End_Date__c = sp.inw_Program_Exit_Date__c;
+                        serviceCodesToUpdate.add(sc);
+                    }
+                }
+            }
+        }
+    }
+    
+    if (!programIntakesToUpdate.isEmpty()) update programIntakesToUpdate;
+    if (!serviceRecipientsToUpdate.isEmpty()) update serviceRecipientsToUpdate;
+    if (!serviceCodesToUpdate.isEmpty()) update serviceCodesToUpdate;
+}
+}
