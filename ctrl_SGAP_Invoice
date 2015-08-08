@@ -1,0 +1,36 @@
+/* Extension Controller for the SGAP Monthly Invoice VisualForce page
+ * 
+ * Created By: bdavis, 2/5/2015
+ * 
+*/
+
+
+public class ctrl_SGAP_Invoice {
+
+    public id ma_id;
+    
+    public ctrl_SGAP_Invoice(ApexPages.StandardController controller){
+        ma_id = controller.getRecord().id;
+    }
+    
+    public List<SGAP_Professional_Service__c>GetRelPSRecs(){
+        List<SGAP_Professional_Service__c> psList = new List<SGAP_Professional_Service__c>();
+        
+        for(SGAP_Monthly_Accounting__c ma:[SELECT id, name, inw_Hourly_Rate__c,
+                                          (SELECT id, name,
+                                                inw_Date__c,
+                                                inw_Task_Performed_By__c,
+                                                 inw_Professional_Services__c,
+                                                inw_Hours__c,
+                                                inw_Amount_Charged__c
+                                           FROM Court_Summaries__r
+                                           ORDER BY inw_Date__c ASC)
+                                           FROM SGAP_Monthly_Accounting__c
+                                           WHERE id=:ma_id]){
+           for(SGAP_Professional_Service__c ps:ma.Court_Summaries__r)
+                psList.add(ps);
+                                               
+        }
+        return psList;
+    }
+}
