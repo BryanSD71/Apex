@@ -1,0 +1,108 @@
+@isTest
+private class SessionManager_Test{
+    
+    public static testMethod void createAttendanceRecords_Test(){
+    
+    //Create Screening records
+      hhs__Screening__c testScrn1 = new hhs__Screening__c();
+        insert testScrn1;
+      hhs__Screening__c testScrn2 = new hhs__Screening__c();
+        insert testScrn2;
+      hhs__Screening__c testScrn3 = new hhs__Screening__c();
+        insert testScrn3;
+        
+    //Create Household records
+        hhs__Households__c testHH1 = new hhs__Households__c(
+          hhs__Screening_ID__c = testScrn1.id,
+          inw_First_Name__c = 'Unit',
+          inw_Last_Name__c = 'Test1',
+          hhs__Current_As_Of__c = system.today());
+        insert testHH1;
+        
+        hhs__Households__c testHH2 = new hhs__Households__c(
+            hhs__Screening_ID__c = testScrn2.id,
+          inw_First_Name__c = 'Unit',
+          inw_Last_Name__c = 'Test2',
+          hhs__Current_As_Of__c = system.today());
+        insert testHH2;
+        
+        hhs__Households__c testHH3 = new hhs__Households__c(
+            hhs__Screening_ID__c = testScrn3.id,
+          inw_First_Name__c = 'Unit',
+          inw_Last_Name__c = 'Test3',
+          hhs__Current_As_Of__c = system.today());
+        insert testHH3;
+        
+    //Create Contact records
+        Contact testContact1 = new Contact(
+            FirstName = 'Unit',
+            LastName = 'Test1',
+            hhs__Screening_ID__c = testScrn1.id,
+            hhs__Household_ID_del__c = testHH1.id);
+        insert testContact1;
+        
+        Contact testContact2 = new Contact(
+            FirstName = 'Unit',
+            LastName = 'Test2',
+            hhs__Screening_ID__c = testScrn2.id,
+            hhs__Household_ID_del__c = testHH2.id);
+        insert testContact2;
+        
+        Contact testContact3 = new Contact(
+            FirstName = 'Unit',
+            LastName = 'Test3',
+            hhs__Screening_ID__c = testScrn3.id,
+            hhs__Household_ID_del__c = testHH3.id);
+        insert testContact3;
+        
+    //Get auto-created General Intake records
+        hhs__General_Intakes__c testGI1 = [SELECT Id, hhs__Contact__c 
+                                           FROM hhs__General_Intakes__c 
+                                           WHERE hhs__Contact__c = :testContact1.id];
+        
+        hhs__General_Intakes__c testGI2 = [SELECT Id, hhs__Contact__c 
+                                           FROM hhs__General_Intakes__c 
+                                           WHERE hhs__Contact__c = :testContact2.id];
+        
+        hhs__General_Intakes__c testGI3 = [SELECT Id, hhs__Contact__c 
+                                           FROM hhs__General_Intakes__c 
+                                           WHERE hhs__Contact__c = :testContact3.id];
+    
+    //Create Participant Group
+    
+    Participant_Group__c pg = new Participant_Group__c(name='Test Group', inw_First_Session__c = system.today());
+    insert pg;
+        
+    //Create Registration records for this Participant Group
+
+    Registration__c testReg1 = new Registration__c(inw_Participant_Group__c = pg.id, 
+                                            inw_General_Intake__c = testGI1.id,
+                                            inw_Active__c = TRUE);
+    insert testReg1;
+    
+    Registration__c testReg2 = new Registration__c(inw_Participant_Group__c = pg.id, 
+                                            inw_General_Intake__c = testGI2.id,
+                                            inw_Active__c = TRUE);
+    insert testReg2;
+
+    Registration__c testReg3 = new Registration__c(inw_Participant_Group__c = pg.id, 
+                                            inw_General_Intake__c = testGI3.id,
+                                            inw_Active__c = FALSE);
+    insert testReg3;
+
+    //Create Session
+    inw_Session__c testSession = new inw_Session__c(inw_Participant_Group__c = pg.id,
+                                                    inw_Session_Date__c = system.today(),
+                                                    inw_Session_Length_Hours__c = 2.0);
+    insert testSession;
+    
+    system.assert(testSession != null);
+    
+    list<inw_Attendance__c> testAtt = [SELECT id, name FROM inw_Attendance__c WHERE inw_Session__c = :testSession.id];
+    
+    system.assert(testAtt.size() > 0);
+    system.assert(testAtt.size() < 3);
+    
+    }
+    
+}
