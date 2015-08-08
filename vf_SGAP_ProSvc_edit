@@ -1,0 +1,38 @@
+<apex:page standardController="SGAP_Professional_Service__c" extensions="ctrl_SGAP_ProSvc">
+
+<apex:sectionHeader title="{!$ObjectType.SGAP_Professional_Service__c.Label} Edit" subtitle="New {!$ObjectType.SGAP_Professional_Service__c.Label}"/>
+<apex:form >
+    <apex:pageMessages />
+    <apex:pageBlock title="{!$ObjectType.SGAP_Professional_Service__c.Label} Edit" mode="Edit">
+        <apex:pageBlockButtons >
+            <apex:commandButton action="{!save}" value="Save"/>
+            <apex:commandButton action="{!cancel}" value="Cancel"/>
+        </apex:pageBlockButtons>
+        
+        <apex:pageBlockSection Title="Related Records" columns="1">
+            <apex:inputField style="width:500px" value="{!SGAP_Professional_Service__c.inw_Case_Note__c}" required="true"/>
+            <apex:inputField style="width:500px" value="{!SGAP_Professional_Service__c.inw_Service_Plan__c}" required="true"/>
+            <apex:inputField style="width:500px" value="{!SGAP_Professional_Service__c.inw_SGAP_Monthly_Accounting__c}" required="true"/>
+        </apex:pageBlockSection>
+        
+        <apex:pageBlockSection Title="Case Note Information (Read-Only)" columns="1">
+            <apex:outputField value="{!cn.hhs__Note_Details__c}"/>
+        </apex:pageBlockSection>
+        
+        <apex:pageBlockSection columns="2">
+            <apex:outputField value="{!cn.inw_Contact_Date_Time__c}"/>
+            <apex:outputField value="{!SGAP_Professional_Service__c.inw_Amount_Charged__c}"/>
+            <apex:outputField value="{!cn.hhs__Total_Time_in_Session__c}"/><br/>
+            <apex:outputField value="{!cn.inw_SGAP_Task_Performed_By__c}"/>
+        </apex:pageBlockSection>
+        
+        <apex:pageBlockSection title="Services" columns="1">
+            <apex:inputField style="width:500px; height:75px" value="{!SGAP_Professional_Service__c.inw_Professional_Services__c}" required="true"/>
+        </apex:pageBlockSection>
+        
+        <apex:pageBlockSection title="Record Id" columns="1">
+            <apex:inputField style="width:500px" value="{!SGAP_Professional_Service__c.Name}" required="true"/>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+</apex:form>
+</apex:page>
