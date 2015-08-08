@@ -1,0 +1,31 @@
+/* Extension Controller for the SGAP Monthly Invoice VisualForce page
+ * 
+ * Created By: bdavis, 3/11/2015
+ * 
+*/
+
+
+public with sharing class ctrl_SGAP_ProSvc {
+
+    public SGAP_Professional_Service__c ps {get;set;}
+    public hhs__Case_Notes__c cn {get;set;}
+    
+    public ctrl_SGAP_ProSvc(ApexPages.StandardController controller){
+        ps = (SGAP_Professional_Service__c)controller.getRecord();
+        Id cnId = ps.inw_Case_Note__c;
+        
+        system.Debug('****** Case Note record Id is ' + cnId);
+        
+        ps.Name = 'This field will auto-fill on save';
+        
+        cn = [SELECT id, Name, 
+                hhs__Note_Details__c, 
+                inw_Contact_Date_Time__c,
+                hhs__Total_Time_in_Session__c,
+                inw_SGAP_Task_Performed_By__c
+              FROM hhs__Case_Notes__c
+              WHERE id=:cnId];
+        
+    }
+
+}
