@@ -1,0 +1,66 @@
+@isTest
+public class ctrl_FaceSheet_Tests{
+    
+    public static testMethod void test_ctrl_FaceSheet(){
+        // Test coverage for the Face Sheet Print View page
+        PageReference pageRef = Page.FaceSheet;
+        Test.setCurrentPageReference(pageRef);
+        
+        //Create new Screening, household, contact, program intake, and Service Recipient
+        //Genreal Intake and Service Plan should be auto-created by other APEX code
+        
+        string FN = 'FS';
+        string LN = 'Test';
+        date todaysDate = system.today();
+        
+        hhs__Screening__c s = new hhs__Screening__c(hhs__First_Name__c = FN,
+                                                    hhs__Last_Name__c = LN);
+        insert s;
+        
+        hhs__Households__c hh = new hhs__Households__c(inw_First_Name__c = FN,
+                                                       inw_Last_Name__c = LN,
+                                                       hhs__Screening_ID__c = s.id,
+                                                       hhs__Current_As_Of__c = todaysDate);
+        insert hh;
+        
+        Contact c = new Contact(hhs__Household_ID_del__c = hh.id,
+                                hhs__Screening_ID__c = s.id,
+                                firstName = FN,
+                                lastName = LN);
+        insert c;
+        
+        hhs__General_Intakes__c gi = [SELECT hhs__Contact__c, Id
+                                      FROM hhs__General_Intakes__c
+                                      WHERE hhs__Contact__c = :c.id];
+        
+        Id rtID = [SELECT Id, name
+                   FROM RecordType
+                   WHERE name='Housing (General)' and sObjectType='hhs__Program_Intake__c' LIMIT 1].Id;
+        //Id pID = [SELECT Id, name
+                  //FROM Product2
+                  //WHERE name='Housing (General)'].Id;
+        
+        hhs__Program_Intake__c pi = new hhs__Program_Intake__c(hhs__Participant_Name1__c = c.id,
+                                                               hhs__General_Intake__c = gi.id,
+                                                               hhs__Program__c = '01tU0000001GQ0W',
+                                                               hhs__Household_ID1__c = hh.id,
+                                                               RecordTypeId = rtId);
+        insert pi;
+        
+        system.assertNotEquals(pi.id, null);
+        
+        Service_Recipient__c sr = new Service_Recipient__c(inw_Program_Intake__c = pi.id,
+                                                           inw_Client_General_Intake__c = gi.id,
+                                                           inw_Client_Household_ID__c = hh.id,
+                                                           inw_Program_Start_Date__c = todaysDate);
+        
+        insert sr;
+        
+        ApexPages.StandardController sc = new ApexPages.StandardController(pi);
+        ctrl_FaceSheet e = new ctrl_FaceSheet(sc);
+        
+        system.assert(e != null);
+        system.assert(e.GetRelSRRecs() != null);
+        system.assert(pageRef != null);
+    }
+}
