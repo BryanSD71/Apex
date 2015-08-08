@@ -1,0 +1,111 @@
+@isTest
+
+/* Test coverage for the ctrl_SGAP_ProSvc class
+ * 
+ * bdavis, 3/16/2015
+ * 
+ */
+
+public class ctrl_SGAP_ProSvc_Test {
+
+    public static testMethod void test_ctrl_SGAP_ProSvc(){
+        PageReference pageRef = Page.SGAP_ProSvc_Edit;
+        Test.setCurrentPageReference(pageRef);
+    
+        //Create new Screening, household, contact, program intake, and case notes
+        //Genreal Intake and Service Plan should be auto-created by other APEX code
+        
+        string FN = 'SGAP_ProSvc';
+        string LN = 'Test';
+        date todaysDate = system.today();
+        
+        hhs__Screening__c s = new hhs__Screening__c(hhs__First_Name__c = FN,
+                                                    hhs__Last_Name__c = LN);
+        insert s;
+        
+        hhs__Households__c hh = new hhs__Households__c(inw_First_Name__c = FN,
+                                                       inw_Last_Name__c = LN,
+                                                       hhs__Screening_ID__c = s.id,
+                                                       hhs__Current_As_Of__c = todaysDate);
+        insert hh;
+        
+        Contact c = new Contact(hhs__Household_ID_del__c = hh.id,
+                                hhs__Screening_ID__c = s.id,
+                                firstName = FN,
+                                lastName = LN);
+        insert c;
+        
+        hhs__General_Intakes__c gi = [SELECT hhs__Contact__c, Id
+                                      FROM hhs__General_Intakes__c
+                                      WHERE hhs__Contact__c = :c.id];
+        
+        Id rtID = [SELECT Id, name
+                   FROM RecordType
+                   WHERE name='SGAP' and sObjectType='hhs__Program_Intake__c' LIMIT 1].Id;
+        //Id pID = [SELECT Id, name
+                  //FROM Product2
+                  //WHERE name='Housing (General)'].Id;
+        
+        hhs__Program_Intake__c pi = new hhs__Program_Intake__c(hhs__Participant_Name1__c = c.id,
+                                                               hhs__General_Intake__c = gi.id,
+                                                               hhs__Program__c = '01tU0000001G1uQ',
+                                                               hhs__Household_ID1__c = hh.id,
+                                                               inw_Case_Management_Code__c = 'Program Fees',
+                                                               RecordTypeId = rtId);
+        insert pi;
+        
+        Service_Recipient__c sr = new Service_Recipient__c(inw_Program_Intake__c = pi.id,
+                                                           inw_Client_Household_ID__c = hh.id,
+                                                           inw_Client_General_Intake__c = gi.id,
+                                                           inw_Program_Start_Date__c = todaysDate);
+                                                           
+        insert sr;
+        
+        system.assertNotEquals(pi.id, null);
+        
+        hhs__Service_Plan__c sp = [SELECT hhs__Program_Intake__c, Id
+                                   FROM hhs__Service_Plan__c
+                                   WHERE hhs__Program_Intake__c = :pi.id];
+        
+        //Create new SGAP Yearly Accounting and SGAP Monthly Accounting
+        
+        SGAP_Yearly_Accounting__c ya = new SGAP_Yearly_Accounting__c(inw_Service_Plan__c = sp.id,
+                                                                     inw_Start_Date_of_Acct_Period__c = todaysDate);
+        
+        SGAP_Monthly_Accounting__c ma = new SGAP_Monthly_Accounting__c(SGAP_Yearly_Accounting__c = ya.id,
+                                                                       inw_First_Date_of_Month__c = todaysDate,
+                                                                       inw_Hourly_Rate__c = 50);
+        
+        User author = [SELECT User.id FROM User WHERE User.id = :Userinfo.getUserId()];
+        
+        //Create 3 case note records with different dates
+        Datetime myDateTime1 = datetime.now();
+        
+        hhs__Case_Notes__c cn1 = new hhs__Case_Notes__c(hhs__Participant_Name__c = c.Id,
+                                                        hhs__Service_Plan__c = sp.id,
+                                                        inw_Author__c = author.id,
+                                                        RecordTypeId = '012U0000000QQfC',
+                                                        inw_Contact_Date_Time__c = myDateTime1,
+                                                        hhs__Category__c = 'Conservator',
+                                                        hhs__Contact_Type__c = 'Phone',
+                                                        inw_SGAP_Task_Performed_By__c = 'Debbie McNew',
+                                                        hhs__Total_Time_in_Session__c = 0.1);
+        
+        insert cn1;
+        
+        //Create 3 Professional Services Records from the above inserted case notes
+        SGAP_Professional_Service__c ps1 = new SGAP_Professional_Service__c(inw_Case_Note__c = cn1.id,
+                                                                            inw_SGAP_Monthly_Accounting__c = ma.id,
+                                                                            inw_Service_Plan__c = sp.id,
+                                                                            inw_Professional_Services__c = 'Test1');
+        
+        ApexPages.StandardController sc = new ApexPages.StandardController(ps1);
+        
+        ctrl_SGAP_ProSvc e = new ctrl_SGAP_ProSvc(sc);
+        
+        system.assert(e != null);
+        system.assert(e.cn != null);
+        system.assert(pageRef != null);
+    
+    }
+}
