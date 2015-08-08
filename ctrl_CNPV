@@ -1,0 +1,45 @@
+/* Extension Controller for the CaseNotePrintView Visualforce Page
+* 
+* Modifications:
+* - M.Smith/Idealist Consulting, 12/27/2013: Allow the list to be filtered by CaseNote Date. 
+* 
+*/
+public class ctrl_CNPV{
+    public id crnt_sp_id;
+    public hhs__Service_Plan__c dateObj     { get; set; }
+    
+    public ctrl_CNPV(ApexPages.StandardController controller){
+        crnt_sp_id = controller.getRecord().id;
+        dateObj = new hhs__Service_Plan__c(); 
+    }
+    
+    public List <hhs__Case_Notes__c> GetRelCNRecs(){
+        List <hhs__Case_Notes__c> cnList = new List <hhs__Case_Notes__c>();
+        
+        Datetime filterStart = DateTime.newInstance((dateObj.hhs__Start_Date__c == null
+            ? date.parse('01/01/1900') : dateObj.hhs__Start_Date__c), Time.newInstance(0,0,0,0));
+        Datetime filterEnd = DateTime.newInstance((dateObj.hhs__End_Date__c == null
+            ? date.parse('01/01/2200') : dateObj.hhs__End_Date__c), Time.newInstance(23,59,59,99));
+        
+        for (hhs__Service_Plan__c sp:[SELECT id, name,
+                                        (SELECT id, name,
+                                         inw_Contact_Date_Time__c,
+                                         inw_Author__c,
+                                         hhs__Category__c,
+                                         hhs__Contact_Type__c,
+                                         hhs__Total_Time_in_Session__c,
+                                         hhs__Note_Details__c,
+                                         inw_Verified__c
+                                         FROM hhs__Notes__r
+                                         WHERE inw_Contact_Date_Time__c >= :filterStart
+                                         AND inw_Contact_Date_Time__c <= :filterEnd
+                                         ORDER BY inw_Contact_Date_Time__c ASC)
+                                     FROM hhs__Service_Plan__c
+                                     WHERE id=:crnt_sp_id]){
+        For(hhs__Case_Notes__c cn:sp.hhs__Notes__r)
+            cnList.add(cn);
+        }
+        return cnList;
+    }
+    
+}
