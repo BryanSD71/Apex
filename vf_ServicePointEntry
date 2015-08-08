@@ -1,0 +1,78 @@
+<apex:page standardController="Service_Recipient__c" showHeader="false" sidebar="false" tabStyle="Service_Recipient__c">
+<apex:stylesheet value="/sCSS/21.0/sprites/1297816277000/Theme3/default/gc/versioning.css" />
+    <table width="98%" border="0" cellpadding="0" cellspacing="0">
+    <tr><td align="right"><a href="javascript:window.print();">Print</a></td></tr>
+    </table>
+<apex:pageBlock Title="Client Name and ID" tabStyle="Service_Recipient__c">
+    <span style="font-size:14pt; font-weight: bold">
+        <apex:outputText value="Client Name: "/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Client_General_Intake__r.inw_Participant_Name_LNFN__c}"/><br /><br />
+        <apex:outputText value="Service Point ID: "/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Client_General_Intake__r.hhs__Contact__r.inw_Service_Point_ID__c}"/><br/><br/>
+        <apex:outputText value="Program Intake: "/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Program_Intake__c}"/>
+    </span><br/><br/>         
+</apex:pageBlock>
+<apex:pageBlock title="Household Members Associated with this Entry/Exit">
+    <apex:pageBlockSection title="Household Members" columns="1">
+        <apex:relatedList subject="{!Service_Recipient__c.inw_Program_Intake__c}" list="Other_Household_Clients__r"/>
+    </apex:pageBlockSection>
+</apex:pageBlock>
+<apex:pageBlock title="DSCP_CoC Entry">
+    <apex:pageBlockSection title="SECTION I" columns="1">
+        <apex:outputField value="{!Service_Recipient__c.inw_Relationship_to_Head_of_Household__c}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Client_General_Intake__r.hhs__Military_Status__c}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Client_Birthdate__c}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Client_Gender__c}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Client_General_Intake__r.hhs__Contact__r.inw_Social_Security_Number__c}"/>
+    </apex:pageBlockSection>
+    <apex:pageBlockSection title="Inclusive Identity (Race/Ethnicity/Origin)" columns="1">
+        <apex:outputField value="{!Service_Recipient__c.inw_Client_General_Intake__r.hhs__Ethnicity_Race__c}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Client_General_Intake__r.hhs__State_Other__c}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Client_General_Intake__r.inw_Is_English_their_primary_language__c}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Client_General_Intake__r.hhs__Languages__c}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Client_General_Intake__r.hhs__Other_Languages__c}"/>
+        <apex:relatedList subject="{!Service_Recipient__c.inw_Client_General_Intake__r}" list="Education_Level__r"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Client_Household_ID__r.inw_Current_Household_Size__c}"/>
+    </apex:pageBlockSection>
+    <apex:pageBlockSection title="Special Needs" columns="1">
+        <apex:relatedList subject="{!Service_Recipient__c.inw_Client_General_Intake__r}" list="Special_Needs__r"/>
+    </apex:pageBlockSection>
+    <apex:pageBlockSection title="Health Insurance" columns="1">
+        <apex:outputField value="{!Service_Recipient__c.inw_Client_General_Intake__r.inw_Medical_Insurance_Provider__c}"/>
+    </apex:pageBlockSection>
+    <apex:pageBlockSection title="SECTION IIa" columns="1">
+        <apex:relatedList subject="{!Service_Recipient__c}" list="Income_Assistance__r"/>
+        
+        <apex:outputField value="{!Service_Recipient__c.inw_Program_Intake__r.inw_Total_Non_Exempt_Income_at_Entry__c}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Program_Intake__r.inw_FPL__c}"/> <br/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Program_Intake__r.inw_HSN_Residence_Prior__c}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Program_Intake__r.inw_HSN_Residence_Prior_Other__c}" 
+            rendered="{!Service_Recipient__c.inw_Program_Intake__r.inw_HSN_Residence_Prior_Other__c != null}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Program_Intake__r.inw_HSN_Length_Stay_Prev_Place__c}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Program_Intake__r.inw_HSN_Zip_of_Last_Perm_Res__c}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Program_Intake__r.inw_HSN_Housing_Status__c}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Program_Intake__r.inw_HSN_Housing_Placement_Type__c}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Program_Intake__r.inw_HSN_Assistance_Type__c}"/> <br/>
+        <apex:outputField value="{!Service_Recipient__c.inw_HSN_Continuously_Homeless__c}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_HSN_Number_of_Times_Homeless__c}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_HSN_Total_months_homeless__c}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_HSN_Total_num_continuously_homeless__c}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_HSN_Lngth_Time_Homeless_Documented__c}"/>
+        <!--<apex:relatedList subject="{!Service_Recipient__c.inw_Client_General_Intake__r}" list="Employment__r"/>-->
+        <apex:outputField value="{!Service_Recipient__c.inw_Client_General_Intake__r.inw_Employment_Status__c}"/>
+    </apex:pageBlockSection>
+    <apex:pageBlockSection title="SECTION III" columns="1">
+        <apex:outputField value="{!Service_Recipient__c.inw_Program_Intake__r.inw_Region_Code__c}"/>
+    </apex:pageBlockSection>
+    <apex:pageBlockSection title="SECTION V" columns="1">
+        <apex:outputField label="Funding stream used for this HOUSHEHOLD" 
+                          value="{!Service_Recipient__c.inw_Program_Intake__r.inw_Case_Management_Code__c}"/>
+        <apex:outputField value="{!Service_Recipient__c.inw_Program_Intake__r.inw_HSN_Move_in_Date_HUD__c}"/>
+    </apex:pageBlockSection>
+    <apex:pageBlockSection title="SECTION VI" columns="1" rendered="{!Service_Recipient__c.inw_Client_General_Intake__r.inw_School_Attend_render__c}">
+        <apex:outputField value="{!Service_Recipient__c.inw_Client_General_Intake__r.inw_School_Status__c}"/>
+        <apex:relatedList subject="{!Service_Recipient__c.inw_Client_General_Intake__r}" list="Schools_Attending__r"/>
+    </apex:pageBlockSection>
+</apex:pageBlock>
+</apex:page>
