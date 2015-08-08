@@ -1,0 +1,152 @@
+@isTest
+private class ParticipantManager_Test {
+
+    public static testMethod void CHSP_Meals_Sessions_Test(){
+        
+        //Create Screening records
+      hhs__Screening__c testScrn1 = new hhs__Screening__c();
+        insert testScrn1;
+      hhs__Screening__c testScrn2 = new hhs__Screening__c();
+        insert testScrn2;
+      hhs__Screening__c testScrn3 = new hhs__Screening__c();
+        insert testScrn3;
+        
+      //Create Household records
+        hhs__Households__c testHH1 = new hhs__Households__c(
+          hhs__Screening_ID__c = testScrn1.id,
+          inw_First_Name__c = 'Unit',
+          inw_Last_Name__c = 'Test1',
+            inw_CHSP_Building__c = 'Dahlke Manor',
+          hhs__Current_As_Of__c = system.today());
+        insert testHH1;
+        
+        hhs__Households__c testHH2 = new hhs__Households__c(
+            hhs__Screening_ID__c = testScrn2.id,
+          inw_First_Name__c = 'Unit',
+          inw_Last_Name__c = 'Test2',
+            inw_CHSP_Building__c = 'Dahlke Manor',
+          hhs__Current_As_Of__c = system.today());
+        insert testHH2;
+        
+        hhs__Households__c testHH3 = new hhs__Households__c(
+            hhs__Screening_ID__c = testScrn3.id,
+          inw_First_Name__c = 'Unit',
+          inw_Last_Name__c = 'Test3',
+            inw_CHSP_Building__c = 'Dahlke Manor',
+          hhs__Current_As_Of__c = system.today());
+        insert testHH3;
+        
+      //Create Contact records
+        Contact testContact1 = new Contact(
+            FirstName = 'Unit',
+            LastName = 'Test1',
+            hhs__Screening_ID__c = testScrn1.id,
+            hhs__Household_ID_del__c = testHH1.id);
+        insert testContact1;
+        
+        Contact testContact2 = new Contact(
+            FirstName = 'Unit',
+            LastName = 'Test2',
+            hhs__Screening_ID__c = testScrn2.id,
+            hhs__Household_ID_del__c = testHH2.id);
+        insert testContact2;
+        
+        Contact testContact3 = new Contact(
+            FirstName = 'Unit',
+            LastName = 'Test3',
+            hhs__Screening_ID__c = testScrn3.id,
+            hhs__Household_ID_del__c = testHH3.id);
+        insert testContact3;
+        
+      //Get auto-created General Intake records
+        hhs__General_Intakes__c testGI1 = [SELECT Id, hhs__Contact__c 
+                                           FROM hhs__General_Intakes__c 
+                                           WHERE hhs__Contact__c = :testContact1.id];
+        
+        hhs__General_Intakes__c testGI2 = [SELECT Id, hhs__Contact__c 
+                                           FROM hhs__General_Intakes__c 
+                                           WHERE hhs__Contact__c = :testContact2.id];
+        
+        hhs__General_Intakes__c testGI3 = [SELECT Id, hhs__Contact__c 
+                                           FROM hhs__General_Intakes__c 
+                                           WHERE hhs__Contact__c = :testContact3.id];
+        
+        //Create Program Intakes
+
+        Product2 program = new Product2(Name = 'CHSP');
+        
+        insert program;
+        
+        Id rtID = [SELECT Id, name
+                   FROM RecordType
+                   WHERE name='CHSP' and sObjectType='hhs__Program_Intake__c' LIMIT 1].Id;
+        
+        hhs__Program_Intake__c testPI1 = new hhs__Program_Intake__c(
+            hhs__Participant_Name1__c = testContact1.id,
+            hhs__General_Intake__c = testGI1.id,
+            hhs__Program__c = program.Id,
+            hhs__Household_ID1__c = testHH1.id,
+            RecordTypeId = rtID);
+        
+        insert testPI1;
+        
+        hhs__Program_Intake__c testPI2 = new hhs__Program_Intake__c(
+            hhs__Participant_Name1__c = testContact2.id,
+            hhs__General_Intake__c = testGI2.id,
+            hhs__Program__c = program.Id,
+            hhs__Household_ID1__c = testHH2.id,
+            RecordTypeId = rtID);
+        
+        insert testPI2;
+        
+        hhs__Program_Intake__c testPI3 = new hhs__Program_Intake__c(
+            hhs__Participant_Name1__c = testContact3.id,
+            hhs__General_Intake__c = testGI3.id,
+            hhs__Program__c = program.Id,
+            hhs__Household_ID1__c = testHH3.id,
+            RecordTypeId = rtID);
+        
+        insert testPI3;
+        
+        system.debug('************************************* testPI3 Program id is ' + testPI3.hhs__Program__c);
+    
+      //Create Participant Group
+    
+      CHSP_Building__c b = new CHSP_Building__c(
+            Name ='Dahlke Manor');
+        
+        insert b;
+        system.assert(b.Id != null);
+        system.debug('************************************* b.id is ' + b.Id);
+        
+        Id pg_rtID = [SELECT Id, name
+                       FROM RecordType
+                       WHERE name='CHSP' and sObjectType='Participant_Group__c' LIMIT 1].Id;
+        
+        Participant_Group__c pg = new Participant_Group__c(
+            inw_Program__c = program.Id,
+            inw_CHSP_Building__c = b.Id,
+            inw_First_Session__c = system.today(),
+            RecordTypeId = pg_rtID
+          );
+      insert pg;
+        system.assert(pg.Id != null);
+        
+        if(pg.id != null){
+            system.debug('************************************* pg.id is ' + pg.Id);
+            system.debug('************************************* Building is ' + pg.inw_CHSP_Building_Name__c);
+        }
+        
+        List<inw_Session__c> testSession = [SELECT Id, Name, inw_Session_Date__c, inw_Location__c, inw_Members_Absent__c
+                                            FROM inw_Session__c
+                                            WHERE inw_Participant_Group__c = :pg.Id];
+        
+        List<Registration__c> testRegs = [SELECT Id, Name, inw_Active__c, inw_General_Intake__c, inw_Participant_Group__c
+                                          FROM Registration__c
+                                          WHERE inw_Participant_Group__c = :pg.Id];
+        
+        System.assert(testSession.size() > 0);
+        System.assert(testRegs.size() > 0);
+
+    }
+}
