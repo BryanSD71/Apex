@@ -1,0 +1,312 @@
+<apex:page standardController="hhs__Program_Intake__c" 
+    extensions="ctrl_FaceSheet"
+    showHeader="false"
+    sidebar="false"
+    tabStyle="hhs__Program_Intake__c">
+<apex:stylesheet value="/sCSS/21.0/sprites/1297816277000/Theme3/default/gc/versioning.css" />
+<style>
+@media print
+{    
+    .no-print, .no-print *
+    {
+        display: none !important;
+    }
+}
+</style>
+<div class="no-print">
+    <table width="98%" border="0" cellpadding="0" cellspacing="0">
+    <tr><td align="right"><a href="javascript:window.print();">Print</a></td></tr>
+    </table>
+</div>
+<span style="font-size:14pt; font-weight: bold">
+    <apex:outputText value="Client Program Intake Report: "/>
+    <apex:outputText value="{!hhs__Program_Intake__c.Name}"/>
+    <br/><br/>
+</span>
+<apex:pageBlock tabStyle="hhs__Program_Intake__c">
+    <apex:pageBlockSection columns="2">
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Program Name"/>
+            <apex:outputField value="{!hhs__Program_Intake__c.hhs__Program__r.Name}"/>
+        </apex:pageBlockSectionItem>
+        <apex:outputField value="{!hhs__Program_Intake__c.hhs__Program_Start_Date__c}"/>
+        <apex:pageBlockSectionItem rendered="{!hhs__Program_Intake__c.inw_Fund_Code__c != null}">
+            <apex:outputLabel value="Fund/Assistance Code"/>
+            <apex:outputField value="{!hhs__Program_Intake__c.inw_Fund_Code__c}"/>
+        </apex:pageBlockSectionItem>
+        <apex:outputField value="{!hhs__Program_Intake__c.inw_Case_Management_Code__c}"/>
+        <apex:pageBlockSectionItem rendered="{!hhs__Program_Intake__c.inw_Region_Code__c != null}">
+            <apex:outputLabel value="Region Code"/>
+            <apex:outputField value="{!hhs__Program_Intake__c.inw_Region_Code__c}"/>
+        </apex:pageBlockSectionItem>
+    </apex:pageBlockSection>
+    <apex:pageBlockSection columns="1">
+        <apex:outputField value="{!hhs__Program_Intake__c.inw_Case_Manager__c}"/>
+    </apex:pageBlockSection>
+    <apex:pageBlockSection title="Household Data" columns="2">
+        <apex:outputField value="{!hhs__Program_Intake__c.hhs__Household_ID1__r.inw_Current_Household_Size__c}"/>
+        <apex:outputField value="{!hhs__Program_Intake__c.inw_Total_Non_Exempt_Income_at_Entry__c}"/>
+        <apex:outputField value="{!hhs__Program_Intake__c.hhs__Household_ID1__r.inw_Current_Full_Address__c}"/>
+        <apex:outputField value="{!hhs__Program_Intake__c.inw_FPL__c}"/>
+        <apex:outputField value="{!hhs__Program_Intake__c.hhs__Participant_Name1__r.npe01__PreferredPhone__c}"/>
+        <apex:outputField value="{!hhs__Program_Intake__c.hhs__Participant_Name1__r.phone}"/>
+    </apex:pageBlockSection>
+    <hr/>
+    <apex:pageBlockSection title="Housing Status at Entry" columns="2" rendered="{!hhs__Program_Intake__c.inw_Fund_Code__c != null}">
+        <apex:outputField value="{!hhs__Program_Intake__c.inw_HSN_Housing_Status__c}"/>
+        <apex:outputField value="{!hhs__Program_Intake__c.inw_HSN_Residence_Prior__c}"/>
+        <apex:outputField value="{!hhs__Program_Intake__c.inw_HSN_Length_Stay_Prev_Place__c}"/>
+        <apex:outputField value="{!hhs__Program_Intake__c.inw_HSN_Zip_of_Last_Perm_Res__c}"/>
+        <apex:outputField value="{!hhs__Program_Intake__c.inw_HSN_Housing_Placement_Type__c}"/>
+        <apex:outputField value="{!hhs__Program_Intake__c.inw_HSN_Assistance_Type__c}"/>
+    <hr/>
+    </apex:pageBlockSection>
+    <apex:repeat var="sr" value="{!RelSRRecs}">
+        <span style="font-size:12pt; font-weight: bold">
+            <br/>
+            <apex:outputText value="Client Information: "/>
+            <apex:outputText value="{!sr.inw_Client_General_Intake__r.inw_Participant_Name_LNFN__c}"/>
+            <br/>
+        </span>
+        <apex:pageBlockSection title="Identification" columns="3" rendered="{!sr.inw_Client_General_Intake__c != null}">
+            
+            <apex:outputField value="{!sr.inw_Client_FirstName__c}"/>
+            <apex:outputField value="{!sr.inw_Client_Middle_Name__c}"/>
+            <apex:outputField value="{!sr.inw_Client_LastName__c}"/>
+            <apex:outputField value="{!sr.inw_Client_General_Intake__r.hhs__Contact__r.inw_Social_Security_Number__c}"
+                rendered="{!sr.inw_Client_General_Intake__r.hhs__Contact__r.inw_Social_Security_Number__c != null}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Social Security Number"
+                rendered="{!sr.inw_Client_General_Intake__r.hhs__Contact__r.inw_Social_Security_Number__c = null &&
+                            sr.inw_Program_Intake__r.RecordType.Name != "Yolanda Project"}"/>
+            <apex:outputField value="{!sr.inw_Client_General_Intake__r.hhs__Contact__r.inw_SSID__c}"
+                rendered="{!sr.inw_Client_General_Intake__r.hhs__Contact__r.inw_SSID__c != null}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="SSID#"
+                rendered="{!sr.inw_Client_General_Intake__r.hhs__Contact__r.inw_SSID__c = null &&
+                           (sr.inw_Program_Intake__r.RecordType.Name="SSSES" ||
+                            sr.inw_Program_Intake__r.RecordType.Name="Urban Opportunities")}"/>
+            <apex:outputField value="{!sr.inw_Client_General_Intake__r.hhs__Contact__r.inw_Service_Point_ID__c}"
+                rendered="{!sr.inw_Client_General_Intake__r.hhs__Contact__r.inw_Service_Point_ID__c!= null}"/>
+            <apex:outputField value="{!sr.inw_Client_General_Intake__r.hhs__Contact__r.inw_PT_Number__c}"
+                rendered="{!sr.inw_Client_General_Intake__r.hhs__Contact__r.inw_PT_Number__c!= null}"/>
+            <apex:outputField value="{!sr.inw_Client_General_Intake__r.hhs__Contact__r.inw_Prime_Number__c}"
+                rendered="{!sr.inw_Client_General_Intake__r.hhs__Contact__r.inw_Prime_Number__c!= null}"/>
+        </apex:pageBlockSection>
+        
+        <apex:pageBlockSection title="Identification: {!sr.inw_Foster_Parent_General_Intake__r.inw_Participant_Name_LNFN__c}" 
+            columns="3"
+            rendered="{!sr.inw_Foster_Parent_General_Intake__c != null}">
+            
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.FirstName}"/>
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.hhs__Middle_Name__c}"/>
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.LastName}"/>
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.inw_Social_Security_Number__c}"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.inw_Social_Security_Number__c != null}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Social Security Number"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.inw_Social_Security_Number__c = null}"/>
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.inw_SSID__c}"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.inw_SSID__c != null}"/>
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.inw_Service_Point_ID__c}"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.inw_Service_Point_ID__c != null}"/>
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.inw_PT_Number__c}"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.inw_PT_Number__c != null}"/>
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.inw_Prime_Number__c}"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.inw_Prime_Number__c != null}"/>
+        </apex:pageBlockSection>
+        <apex:pageBlockSection title="Demographics" columns="1" rendered="{!sr.inw_Client_General_Intake__c != null}">
+            <apex:outputField value="{!sr.inw_Client_Birthdate__c}"
+                rendered="{!sr.inw_Client_Birthdate__c != null}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Birthdate"
+                rendered="{!sr.inw_Client_Birthdate__c = null}"/>
+            <apex:outputField value="{!sr.inw_Client_Gender__c}"
+                rendered="{!sr.inw_Client_Gender__c!= null}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Gender"
+                rendered="{!sr.inw_Client_Gender__c = null}"/>
+            <apex:outputField value="{!sr.inw_Client_General_Intake__r.hhs__Ethnicity_Race__c}"
+                rendered="{!sr.inw_Client_General_Intake__r.hhs__Ethnicity_Race__c != null}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Ethnicity/Race"
+                rendered="{!sr.inw_Client_General_Intake__r.hhs__Ethnicity_Race__c = null}"/>
+            <apex:outputField value="{!sr.inw_Client_General_Intake__r.inw_Is_English_their_primary_language__c}"
+                rendered="{!sr.inw_Client_General_Intake__r.inw_Is_English_their_primary_language__c != null}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Is English their primary language?"
+                rendered="{!sr.inw_Client_General_Intake__r.inw_Is_English_Primary_Data_Missing__c}"/>
+            <apex:outputField value="{!sr.inw_Client_General_Intake__r.hhs__Languages__c}"
+                rendered="{!sr.inw_Client_General_Intake__r.hhs__Languages__c != null}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Languages"
+                rendered="{!sr.inw_Client_General_Intake__r.inw_Lang_Error__c}"/>
+        </apex:pageBlockSection>
+        <apex:pageBlockSection title="Demographics" columns="1" rendered="{!sr.inw_Foster_Parent_General_Intake__c != null}">
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.Birthdate}"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.Birthdate != null}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Birthdate"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.Birthdate = null}"/>
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.hhs__Gender__c}"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.hhs__Gender__c != null}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Gender"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Contact__r.hhs__Gender__c = null}"/>
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Ethnicity_Race__c}"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Ethnicity_Race__c != null}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Ethnicity/Race"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Ethnicity_Race__c = null}"/>
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.inw_Is_English_their_primary_language__c}"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.inw_Is_English_their_primary_language__c != null}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Is English their primary language?"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.inw_Is_English_their_primary_language__c = null}"/>
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Languages__c}"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Languages__c != null}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Languages"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.inw_Lang_Error__c}"/>
+        </apex:pageBlockSection>
+        <apex:pageBlockSection title="Client Status" columns="1" rendered="{!sr.inw_Client_General_Intake__c != null}">
+            <apex:outputField value="{!sr.inw_Client_General_Intake__r.inw_Highest_Education_Level__c}"
+                rendered="{!sr.inw_Client_General_Intake__r.inw_Edu_Lvl_render__c = TRUE &&
+                    sr.inw_Client_General_Intake__r.inw_Edu_Lvl_error__c = FALSE}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Highest Education Level"
+                rendered="{!sr.inw_Client_General_Intake__r.inw_Edu_Lvl_error__c}"/>
+            <apex:outputField value="{!sr.inw_Client_General_Intake__r.inw_Employment_Status__c}"
+                rendered="{!sr.inw_Client_General_Intake__r.inw_Empl_Status_render__c = TRUE &&
+                    sr.inw_Client_General_Intake__r.iwn_Empl_Status_error__c = FALSE}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Employment Status"
+                rendered="{!sr.inw_Client_General_Intake__r.iwn_Empl_Status_error__c}"/>
+                
+            <apex:outputField value="{!sr.inw_Client_General_Intake__r.hhs__Marital_Status__c}"
+                rendered="{!sr.inw_Client_General_Intake__r.inw_Marital_Status_render__c = TRUE &&
+                    sr.inw_Client_General_Intake__r.inw_Marital_Status_error__c = FALSE}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Marital Status"
+                rendered="{!sr.inw_Client_General_Intake__r.inw_Marital_Status_error__c}"/>
+                
+            <apex:outputField value="{!sr.inw_Client_General_Intake__r.hhs__Military_Status__c}"
+                rendered="{!sr.inw_Client_General_Intake__r.inw_Military_Status_render__c = TRUE &&
+                    sr.inw_Client_General_Intake__r.inw_Military_Status_error__c = FALSE}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Military Status"
+                rendered="{!sr.inw_Client_General_Intake__r.inw_Military_Status_error__c}"/>
+                           
+            <apex:outputField value="{!sr.inw_Client_General_Intake__r.inw_School_Attending__c}"
+                rendered="{!sr.inw_Client_General_Intake__r.inw_School_Attend_render__c = TRUE &&
+                    sr.inw_Client_General_Intake__r.inw_School_Attend_error__c = FALSE}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="School Attending"
+                rendered="{!sr.inw_Client_General_Intake__r.inw_School_Attend_error__c}"/>
+                
+            <apex:outputField value="{!sr.inw_Client_General_Intake__r.inw_Current_Grade__c}"
+                rendered="{!sr.inw_Client_General_Intake__r.inw_School_Attend_render__c = TRUE &&
+                    sr.inw_Client_General_Intake__r.inw_School_Attend_error__c = FALSE}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Current Grade"
+                rendered="{!sr.inw_Client_General_Intake__r.inw_School_Attend_error__c}"/>
+                
+            <apex:outputField value="{!sr.inw_Client_General_Intake__r.inw_Medical_Insurance_Provider__c}"
+                rendered="{!sr.inw_Client_General_Intake__r.inw_Medical_Insurance_Provider__c != null}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Medical Insurance Provider"
+                rendered="{!sr.inw_Client_General_Intake__r.inw_Medical_Insurance_Provider__c = null}"/>
+                
+        </apex:pageBlockSection>
+        <apex:pageBlockSection title="Client Status" columns="1" rendered="{!sr.inw_Foster_Parent_General_Intake__c != null}">
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.inw_Highest_Education_Level__c}"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.inw_Edu_Lvl_render__c = TRUE &&
+                    sr.inw_Foster_Parent_General_Intake__r.inw_Edu_Lvl_error__c = FALSE}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Highest Education Level"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.inw_Edu_Lvl_error__c}"/>
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.inw_Employment_Status__c}"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.inw_Empl_Status_render__c = TRUE &&
+                    sr.inw_Foster_Parent_General_Intake__r.iwn_Empl_Status_error__c = FALSE}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Employment Status"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.iwn_Empl_Status_error__c}"/>
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Marital_Status__c}"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.inw_Marital_Status_render__c = TRUE &&
+                    sr.inw_Foster_Parent_General_Intake__r.inw_Marital_Status_error__c = FALSE}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Marital Status"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.inw_Marital_Status_error__c}"/>
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.hhs__Military_Status__c}"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.inw_Military_Status_render__c = TRUE &&
+                    sr.inw_Foster_Parent_General_Intake__r.inw_Military_Status_error__c = FALSE}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Military Status"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.inw_Military_Status_error__c}"/>
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.inw_School_Attending__c}"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.inw_School_Attend_render__c = TRUE &&
+                    sr.inw_Foster_Parent_General_Intake__r.inw_School_Attend_error__c = FALSE}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="School Attending"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.inw_School_Attend_error__c}"/>
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.inw_Current_Grade__c}"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.inw_School_Attend_render__c = TRUE &&
+                    sr.inw_Foster_Parent_General_Intake__r.inw_School_Attend_error__c = FALSE}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Current Grade"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.inw_School_Attend_error__c}"/>
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.inw_Medical_Insurance_Provider__c}"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.inw_Medical_Insurance_Provider__c != null}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Medical Insurance Provider"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.inw_Medical_Insurance_Provider__c = null}"/>
+        </apex:pageBlockSection>
+        <apex:pageBlockSection title="Special Needs" columns="1" rendered="{!sr.inw_Client_General_Intake__c != null}">
+            <!--<apex:relatedList subject="{!sr.inw_Client_General_Intake__r}" list="Special_Needs__r"
+                rendered="{!sr.inw_Client_General_Intake__r.inw_Special_Needs__c != null}"/>-->
+            <apex:outputField value="{!sr.inw_Client_General_Intake__r.inw_Special_Needs__c}"
+                rendered="{!sr.inw_Client_General_Intake__r.inw_Special_Needs__c != null}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Special Needs"
+                rendered="{!sr.inw_Client_General_Intake__r.inw_Special_Needs__c = null}"/>        
+        </apex:pageBlockSection>
+        <apex:pageBlockSection title="Special Needs" columns="1" rendered="{!sr.inw_Foster_Parent_General_Intake__c != null}">
+            <apex:outputField value="{!sr.inw_Foster_Parent_General_Intake__r.inw_Special_Needs__c}"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.inw_Special_Needs__c != null}"/>
+            <apex:outputText value="**Data Missing**"
+                style="color:red; font-weight: bold"
+                label="Special Needs"
+                rendered="{!sr.inw_Foster_Parent_General_Intake__r.inw_Special_Needs__c = null}"/>        
+        </apex:pageBlockSection>
+    <hr/>
+    </apex:repeat>
+</apex:pageBlock>
+</apex:page>
