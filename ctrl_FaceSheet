@@ -1,0 +1,104 @@
+/*  Extension Controller for the FaceSheet Visualforce Page
+***
+*** Bryan Davis 02/19/2014
+***
+*/
+public class ctrl_FaceSheet{
+    public id pi_id;
+    public ctrl_FaceSheet(ApexPages.StandardController controller){
+        pi_id = controller.getRecord().id;
+    }
+    public List <Service_Recipient__c> GetRelSRRecs(){
+        List <Service_Recipient__c> srList = new List <Service_Recipient__c>();
+        
+        for (hhs__Program_Intake__c pi:[SELECT id, name,
+                                        (SELECT id, name,
+                                         inw_Client_FirstName__c,
+                                         inw_Client_Middle_Name__c,
+                                         inw_Client_LastName__c,
+                                         inw_Program_Intake__r.RecordType.Name,
+                                         inw_Client_General_Intake__r.inw_HH_Composition_Data_Missing__c,
+                                         inw_Client_General_Intake__r.inw_HH_Language_Data_Missing__c,
+                                         inw_Client_General_Intake__r.inw_Participant_Name_LNFN__c,
+                                         inw_Client_General_Intake__r.hhs__Contact__r.inw_Social_Security_Number__c,
+                                         inw_Client_General_Intake__r.hhs__Contact__r.inw_SSID__c,
+                                         inw_Client_General_Intake__r.hhs__Contact__r.inw_Service_Point_ID__c,
+                                         inw_Client_General_Intake__r.hhs__Contact__r.inw_PT_Number__c,
+                                         inw_Client_General_Intake__r.hhs__Contact__r.inw_Prime_Number__c,
+                                         inw_Client_Birthdate__c,
+                                         inw_Client_General_Intake__r.inw_Birthdate_Data_Missing__c,
+                                         inw_Client_Gender__c,
+                                         inw_Client_General_Intake__r.inw_Gender_Data_Missing__c,
+                                         inw_Client_General_Intake__r.hhs__Ethnicity_Race__c,
+                                         inw_Client_General_Intake__r.inw_Ethnicity_Race_Data_Missing__c,
+                                         inw_Client_General_Intake__r.inw_Country_of_Birth__c,
+                                         inw_Client_General_Intake__r.inw_Country_of_Birth_Data_Missing__c,
+                                         inw_Client_General_Intake__r.inw_Is_English_their_primary_language__c,
+                                         inw_Client_General_Intake__r.inw_Is_English_Primary_Data_Missing__c,
+                                         inw_Client_General_Intake__r.hhs__Languages__c,
+                                         inw_Client_General_Intake__r.inw_Lang_Error__c,
+                                         inw_Client_General_Intake__r.inw_Highest_Education_Level__c,
+                                         inw_Client_General_Intake__r.inw_Edu_Lvl_render__c,
+                                         inw_Client_General_Intake__r.inw_Edu_Lvl_error__c,
+                                         inw_Client_General_Intake__r.inw_Employment_Status__c,
+                                         inw_Client_General_Intake__r.inw_Empl_Status_render__c,
+                                         inw_Client_General_Intake__r.iwn_Empl_Status_error__c,
+                                         inw_Client_General_Intake__r.hhs__Marital_Status__c,
+                                         inw_Client_General_Intake__r.inw_Marital_Status_render__c,
+                                         inw_Client_General_Intake__r.inw_Marital_Status_error__c,
+                                         inw_Client_General_Intake__r.hhs__Military_Status__c,
+                                         inw_Client_General_Intake__r.inw_Military_Status_render__c,
+                                         inw_Client_General_Intake__r.inw_Military_Status_error__c,
+                                         inw_Client_General_Intake__r.inw_School_Attending__c,
+                                         inw_Client_General_Intake__r.inw_Current_Grade__c,
+                                         inw_Client_General_Intake__r.inw_School_Attend_render__c,
+                                         inw_Client_General_Intake__r.inw_School_Attend_error__c,
+                                         inw_Client_General_Intake__r.inw_Free_or_Reduced_Lunch__c,
+                                         inw_Client_General_Intake__r.inw_Free_Reduced_Lunch_Data_Missing__c,
+                                         inw_Client_General_Intake__r.inw_Medical_Insurance_Provider__c,
+                                         inw_Client_General_Intake__r.inw_Medical_Insurance_Data_Missing__c,
+                                         inw_Client_General_Intake__r.inw_Special_Needs__c,
+                                         inw_Client_General_Intake__r.inw_Special_Needs_Data_Missing__c,
+                                         inw_Foster_Parent_General_Intake__r.hhs__Contact__r.FirstName,
+                                         inw_Foster_Parent_General_Intake__r.hhs__Contact__r.hhs__Middle_Name__c,
+                                         inw_Foster_Parent_General_Intake__r.hhs__Contact__r.LastName,
+                                         inw_Foster_Parent_General_Intake__r.inw_Participant_Name_LNFN__c,
+                                         inw_Foster_Parent_General_Intake__r.hhs__Contact__r.inw_Social_Security_Number__c,
+                                         inw_Foster_Parent_General_Intake__r.hhs__Contact__r.inw_SSID__c,
+                                         inw_Foster_Parent_General_Intake__r.hhs__Contact__r.inw_Service_Point_ID__c,
+                                         inw_Foster_Parent_General_Intake__r.hhs__Contact__r.inw_PT_Number__c,
+                                         inw_Foster_Parent_General_Intake__r.hhs__Contact__r.inw_Prime_Number__c,
+                                         inw_Foster_Parent_General_Intake__r.hhs__Contact__r.Birthdate,
+                                         inw_Foster_Parent_General_Intake__r.hhs__Contact__r.hhs__Gender__c,
+                                         inw_Foster_Parent_General_Intake__r.hhs__Ethnicity_Race__c,
+                                         inw_Foster_Parent_General_Intake__r.inw_Is_English_their_primary_language__c,
+                                         inw_Foster_Parent_General_Intake__r.hhs__Languages__c,
+                                         inw_Foster_Parent_General_Intake__r.inw_Lang_Error__c,
+                                         inw_Foster_Parent_General_Intake__r.inw_Highest_Education_Level__c,
+                                         inw_Foster_Parent_General_Intake__r.inw_Edu_Lvl_render__c,
+                                         inw_Foster_Parent_General_Intake__r.inw_Edu_Lvl_error__c,
+                                         inw_Foster_Parent_General_Intake__r.inw_Employment_Status__c,
+                                         inw_Foster_Parent_General_Intake__r.inw_Empl_Status_render__c,
+                                         inw_Foster_Parent_General_Intake__r.iwn_Empl_Status_error__c,
+                                         inw_Foster_Parent_General_Intake__r.hhs__Marital_Status__c,
+                                         inw_Foster_Parent_General_Intake__r.inw_Marital_Status_render__c,
+                                         inw_Foster_Parent_General_Intake__r.inw_Marital_Status_error__c,
+                                         inw_Foster_Parent_General_Intake__r.hhs__Military_Status__c,
+                                         inw_Foster_Parent_General_Intake__r.inw_Military_Status_render__c,
+                                         inw_Foster_Parent_General_Intake__r.inw_Military_Status_error__c,
+                                         inw_Foster_Parent_General_Intake__r.inw_School_Attending__c,
+                                         inw_Foster_Parent_General_Intake__r.inw_Current_Grade__c,
+                                         inw_Foster_Parent_General_Intake__r.inw_School_Attend_render__c,
+                                         inw_Foster_Parent_General_Intake__r.inw_School_Attend_error__c,
+                                         inw_Foster_Parent_General_Intake__r.inw_Medical_Insurance_Provider__c,
+                                         inw_Foster_Parent_General_Intake__r.inw_Special_Needs__c
+                                         FROM Other_Household_Clients__r
+                                         ORDER BY inw_sr_Primary_Contact__c DESC)
+                                     FROM hhs__Program_Intake__c
+                                     WHERE id=:pi_id]){
+        For(Service_Recipient__c sr:pi.Other_Household_Clients__r)
+            srList.add(sr);
+        }
+        return srList;
+    }
+}
