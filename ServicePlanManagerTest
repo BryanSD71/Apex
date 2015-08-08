@@ -1,0 +1,92 @@
+@isTest
+public class ServicePlanManager_Test {
+
+    public static testMethod void setProgramEndDates_Test() {
+      
+      // Create contact record
+      Contact testContact = new Contact(LastName = 'Testy');
+      insert testContact;
+
+      // Create screening record
+      hhs__Screening__c testScreening = new hhs__Screening__c();
+      insert testScreening;
+
+      // Create household record
+      hhs__Households__c testHousehold = new hhs__Households__c(hhs__Screening_ID__c = testScreening.Id,
+                                    inw_First_Name__c = 'Testy',
+                                    inw_Last_Name__c = 'Testerson');
+      insert testHousehold;
+
+      // Create general intake record
+      hhs__General_Intakes__c testGeneralIntake = new hhs__General_Intakes__c(hhs__Contact__c = testContact.Id,
+                                          hhs__Primary_Household_ID__c = testHousehold.Id);
+      insert testGeneralIntake;
+
+        // Create program intake record
+        hhs__Program_Intake__c testProgramIntake = new hhs__Program_Intake__c(hhs__Intake_Status__c = 'Open',
+                                            hhs__General_Intake__c = testGeneralIntake.Id,
+                                            hhs__Participant_Name1__c = testContact.Id);
+        insert testProgramIntake;
+        
+        // Create service plan record
+        hhs__Service_Plan__c testServicePlan = new hhs__Service_Plan__c(hhs__Program_Intake__c = testProgramIntake.Id,
+                                        hhs__Participant_Name__c = testContact.Id,
+                                        Set_All_End_Dates__c = true);
+        insert testServicePlan;
+        
+        // Create service recipient record
+        Service_Recipient__c testServiceRecipient = new Service_Recipient__c(inw_Program_Intake__c = testProgramIntake.Id);
+        insert testServiceRecipient;
+        
+        // Create service code record
+        Service_Code__c testServiceCode = new Service_Code__c(inw_Program_Intake__c = testProgramIntake.Id);
+                                                                //inw_AFP_Service_Recipient__c = testServiceRecipient.Id);
+        insert testServiceCode;
+        
+        /*
+        // Create program exit record
+        hhs__Program_Exits__c testProgramExit = new hhs__Program_Exits__c(hhs__Service_Plan__c = testServicePlan.Id);
+        insert testProgramExit;
+
+        // Assert that workflow fired to set service plan record end date, is this still relevant?
+
+        */
+
+        Test.startTest();
+
+        testServicePlan.inw_Program_Exit_Date__c = date.today();
+        update testServicePlan;
+
+        Test.stopTest();
+
+        
+        // Assert that program intake record was set to 'Closed' and end date was populated
+        testProgramIntake = [
+            SELECT hhs__Intake_Status__c, inw_Program_Exit_Date__c
+            FROM hhs__Program_Intake__c
+            WHERE Id = :testProgramIntake.Id
+        ];
+        system.assertEquals(testServicePlan.inw_Program_Exit_Date__c, testProgramIntake.inw_Program_Exit_Date__c);
+        system.assertEquals('Closed', testProgramIntake.hhs__Intake_Status__c);
+        
+        
+        // Assert that service recipient record end date was set
+        testServiceRecipient = [
+            SELECT inw_Program_Exit_Date__c
+            FROM Service_Recipient__c
+            WHERE Id = :testServiceRecipient.Id
+        ];
+        system.assertEquals(testServicePlan.inw_Program_Exit_Date__c, testServiceRecipient.inw_Program_Exit_Date__c);
+
+        
+        // Assert that service code record end date was set
+        testServiceCode = [
+            SELECT inw_Service_Code_End_Date__c
+            FROM Service_Code__c
+            WHERE Id = :testServiceCode.Id
+        ];
+        system.assertEquals(testServicePlan.inw_Program_Exit_Date__c, testServiceCode.inw_Service_Code_End_Date__c);
+
+    }
+
+}
