@@ -1,0 +1,145 @@
+/* Class Manager for the Participant Groups Object
+* 
+* Created By: Bryan Davis 10/07/2014
+*
+* Modifications:
+* 
+* 
+*/
+
+public with sharing class ParticipantGroupManager {
+
+    public static void CHSP_Meals_Sessions() {
+        
+        //Auto-create Sessions for the week. Each meal is a session.
+        
+        List<inw_Session__c> newSession = new List<inw_Session__c>();
+        Set<Id> programIds = new Set<Id>();
+        List<Participant_Group__c> chsp_pg = new List<Participant_Group__c>();
+        
+        //Get the Participant Group record
+        
+        for (sObject obj: trigger.new){
+            Participant_Group__c pg = (Participant_Group__c) obj;
+            if (pg.inw_First_Session__c != null) chsp_pg.add(pg);
+            if (pg.inw_Program__c != null) programIds.add(pg.inw_Program__c);
+        }
+        
+        Map<Id, Product2> ProgramMap = new Map<Id, Product2>([SELECT Id, Name FROM Product2
+                                                              WHERE Id IN :programIds
+                                                              AND Name = 'CHSP']);
+        
+        
+        for (Participant_Group__c pg:chsp_pg){
+            if (ProgramMap.containsKey(pg.inw_Program__c)){
+                Product2 currentProgram = ProgramMap.get(pg.inw_Program__c);
+                Date sessionDate = pg.inw_First_Session__c;
+                for (Integer i = 0; i < 7; i++){
+                    Date newDate = sessionDate.addDays(i);
+                    DateTime newDateTime = (DateTime) newDate;
+                    newDateTime = newDateTime.addHours(12);
+                    System.debug('****** newDate is ' + newDate);
+                    System.debug('****** newDateTime is ' + newDateTime);
+                    string programName = currentProgram.Name;
+                    string CHSPBuilding = pg.inw_CHSP_Building_Name__c;
+                    string FirstSessionDate = pg.inw_First_Session__c.format();
+                    newSession.add(new inw_Session__c(
+                        Name = programName + '>' + CHSPBuilding + '>Week of ' + FirstSessionDate + '>' + newDate.format(),
+                        inw_Participant_Group__c = pg.Id,
+                        inw_Session_Date__c = newDate,
+                        inw_Session_Length_Hours__c = 0,
+                        inw_Location__c = pg.inw_CHSP_Building_Name__c,
+                        inw_Activity__c = 'CHSP Meal'));
+                    System.debug('****** Day of the week is ' + newDateTime.format('E'));
+                    System.debug('****** Time Zone is ' + newDateTime.format('z'));
+                    if (newDateTime.format('E') == 'Sat' || newDateTime.format('E') == 'Sun'){
+                        newSession.add(new inw_Session__c(
+                            Name = programName + '>' + CHSPBuilding + '>Week of ' +FirstSessionDate + '>' + newDate.format() 
+                            + ' Brunch',
+                            inw_Participant_Group__c = pg.Id,
+                            inw_Session_Date__c = newDate,
+                            inw_Session_Length_Hours__c = 0,
+                            inw_Location__c = pg.inw_CHSP_Building_Name__c,
+                            inw_Activity__c = 'CHSP Meal'));
+                    }
+                }
+            }
+        }
+        
+        insert newSession;
+                
+        //Code to generate the list of meals for the given time period
+    }
+    
+    public static void CHSP_Meals_Participants(){
+        //Auto-create Participants (Registrations) for the Participant Group
+        
+        List<Registration__c> newReg = new list<Registration__c>();
+        
+        //Get the Participant Group record
+        
+        //List<hhs__Program_Intake__c> chsp_pi = new List<hhs__Program_Intake__c>();
+        List<Participant_Group__c> partGroups = new List<Participant_Group__c>();
+        Set<Id> programIds = new Set<Id>();
+        Set<Id> buildingIds = new Set<Id>();
+        
+        for(sObject obj:trigger.new){
+            Participant_Group__c pg = (Participant_Group__c) obj;
+            System.debug('****** Enrolled field is ' + pg.inw_Enrolled__c);
+            if(pg.inw_Enrolled__c == 0) partGroups.add(pg);
+            if(pg.inw_CHSP_Building__c != null) buildingIds.add(pg.inw_CHSP_Building__c);
+            if(pg.inw_Program__c != null) programIds.add(pg.inw_Program__c);
+        
+            //Get list of General Intakes that are enrolled in CHSP
+        }
+        
+        System.debug('****** partGroups size is ' + partGroups.size());
+        
+        Map<Id, Product2> ProgramMap = new Map<Id, Product2>([SELECT Id, Name FROM Product2 
+                                                              WHERE Id IN :programIds
+                                                              AND (Name = 'CHSP'
+                                                                   OR Id = '01tU0000001G1w6')]);
+        Map<Id, CHSP_Building__c> BuildingMap = new Map<Id, CHSP_Building__c>([SELECT Id, Name FROM CHSP_Building__c
+                                                                               WHERE Id IN :buildingIds]);
+        
+        // Get CHSP Program Intakes that are in the building selected in the Participant Group record
+
+        for (Participant_Group__c pg:partGroups){
+            if(ProgramMap.containsKey(pg.inw_Program__c) &&
+               BuildingMap.containsKey(pg.inw_CHSP_Building__c)) {
+                    Product2 currentProgram = ProgramMap.get(pg.inw_Program__c);
+                    CHSP_Building__c currentBuilding = BuildingMap.get(pg.inw_CHSP_Building__c);
+                    System.debug('****** PG Program Id is ' + currentProgram.Id);
+                    System.debug('****** PG Building Name is ' + currentBuilding.Name);
+                    hhs__Program_Intake__c[] chsp_pi = [SELECT Id, 
+                                                            hhs__General_Intake__c, 
+                                                            hhs__Program__c, 
+                                                            inw_Program_Exit_Date__c,
+                                                            inw_CHSP_Building__c,
+                                                            inw_Participant_Name_LNFN__c
+                                                        FROM hhs__Program_Intake__c
+                                                        WHERE hhs__Program__c = :currentProgram.Id
+                                                        AND inw_CHSP_Building__c = :currentBuilding.Name
+                                                        AND inw_Program_Exit_Date__c = null];
+                   System.debug('****** chsp_pi list rows = ' + chsp_pi.size());
+                   
+                   for(hhs__Program_Intake__c pi: chsp_pi){
+                        if(pi.hhs__General_Intake__c != null){
+                            string clientName=pi.inw_Participant_Name_LNFN__c;
+                            string programName=currentProgram.Name;
+                            string CHSPBuilding=currentBuilding.Name;
+                            string FirstSessionDate=pg.inw_First_Session__c.format();
+                            newReg.add(new Registration__c(
+                                Name = clientName + '>' + programName + '>' + CHSPBuilding + '>Week of ' + FirstSessionDate,
+                                inw_General_Intake__c = pi.hhs__General_Intake__c,
+                                inw_Participant_Group__c = pg.Id,
+                                inw_Active__c = TRUE));
+                        }
+                    }
+               }
+        }
+                
+        insert newReg;
+    }
+
+}
