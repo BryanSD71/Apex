@@ -1,0 +1,154 @@
+<apex:page sidebar="true" standardStylesheets="false" showHeader="true" standardController="SGAP_Professional_Service__c" extensions="ctrl_SGAP_ProSvc">
+<!-- Bootstrap core CSS -->
+<apex:stylesheet value="{!URLFOR($Resource.bs_namespace, '/bootstrap-bs-namespace-master/css/bootstrap.min.css')}" />
+<apex:includeScript value="{!URLFOR($Resource.bs_namespace, '/bootstrap-bs-namespace-master/js/bootstrap.min.js')}"/>
+
+<style type="text/css">
+    .bs_text {font-size:14px; font-family:Helvetica; color:#4C4646}
+    .bs_text_r {font-size:14px; font-family:Helvetica; color:#4C4646; text-align: right}
+</style>
+<div class="bs">
+    <div class="Container">
+        <div class="page-header">
+            <h3>
+                <small>&nbsp;SGAP Professional Service Edit</small><br/>
+                <img src="/s.gif" alt="SGAP Professional Service" class="pageTitleIcon" title="SGAP Professional Service"/>
+                New SGAP Professional Service
+            </h3><br/>
+        </div>
+        <apex:form >
+            <apex:pageMessages /> <!-- this is where the error messages will appear -->
+            <apex:pageBlock title="Enter Professional Service" mode="edit">
+            
+            <apex:pageBlockButtons styleclass="col-sm-offset-1 col-sm-10">
+                <apex:commandButton action="{!save}" value="Save" styleClass="btn btn-primary" />
+                <apex:commandButton action="{!cancel}" value="Cancel" styleClass="btn btn-warning" />
+            </apex:pageBlockButtons>
+            
+            <div Class="panel panel-info">
+                <div Class="panel-heading">
+                    <h3 class="panel-title">Related Records</h3>
+                    <span class="requiredLegend pull-right">
+                        <span class="requiredExampleOuter">
+                            <span class="requiredExample">&nbsp;</span>
+                        </span>
+                        <span class="requiredText"> = Required Information</span>
+                    </span>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="input-group col-md-3 col-md-offset-1">
+                            <span class="bs_text">
+                                <apex:outputLabel value="Case Note"/><br/>
+                                <apex:inputField style="width:500px; height:25px" value="{!SGAP_Professional_Service__c.inw_Case_Note__c}"/>
+                            </span>
+                        </div>
+                        <div class="col-md-12">
+                            &nbsp;
+                        </div>
+                        <div class="input-group col-md-3 col-md-offset-1">
+                            <span class="bs_text">
+                                <apex:outputLabel value="Service Plan"/><br/>
+                                <apex:inputField style="width:500px; height:25px" value="{!SGAP_Professional_Service__c.inw_Service_Plan__c}" required="true"/>
+                            </span>
+                        </div>
+                        <div class="col-md-12">
+                            &nbsp;
+                        </div>
+                        <div class="input-group col-md-3 col-md-offset-1">
+                            <span class="bs_text">
+                                <apex:outputLabel value="SGAP Monthly Accounting"/><br/>
+                                <apex:inputField style="width:500px; height:25px" value="{!SGAP_Professional_Service__c.inw_SGAP_Monthly_Accounting__c}" required="true"/>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>           
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Case Note Information (Read-Only)</h3>
+                </div>
+                <div class="panel-body input-group">
+                    <div class="row">
+                        <div class="col-md-2 bs_text_r">
+                            <apex:outputLabel value="Case Note Narrative"/>
+                        </div>
+                        <div class="col-md-10 bs_text">
+                            <apex:outputField value="{!cn.hhs__Note_Details__c}"/>
+                        </div>
+                        <div class="col-md-12">
+                            &nbsp;
+                        </div>
+                        <div class="col-md-12">
+                            &nbsp;
+                        </div>
+                        <div class="col-md-2 bs_text_r">
+                            <apex:outputLabel value="Contact Date/Time"/>
+                        </div>
+                        <div class="col-md-4 bs_text">
+                            <apex:outputField value="{!cn.inw_Contact_Date_Time__c}"/>
+                        </div>
+                        <div class="col-md-2 bs_text_r">
+                            <apex:outputLabel value="Amount Charged"/>  
+                        </div>
+                        <div class="col-md-4 bs_text">                                    
+                            <apex:outputField value="{!SGAP_Professional_Service__c.inw_Amount_Charged__c}"/>
+                        </div>
+                        <div class="col-md-12">
+                            &nbsp;
+                        </div>
+                        <div class="col-md-2 bs_text_r">
+                            <apex:outputLabel value="Total Time in Session"/>  
+                        </div>
+                        <div class="col-md-10 bs_text">
+                            <apex:outputField value="{!cn.hhs__Total_Time_in_Session__c}"/>
+                        </div>
+                        <div class="col-md-12">
+                            &nbsp;
+                        </div>
+                        <div class="col-md-2 bs_text_r">
+                            <apex:outputLabel value="Task Performed By"/>
+                        </div>
+                        <div class="col-md-10 bs_text">
+                            <apex:outputField value="{!cn.inw_SGAP_Task_Performed_By__c}"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Services</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="input-group col-md-3 col-md-offset-1 bs_text">
+                            <apex:outputLabel value="Professional Services"/>
+                            <span class="helpButton" id="example-title-_help">
+                                <img src="/s.gif" class="helpOrb"/>
+                                <script type="text/javascript">
+                                    sfdcPage.setHelp('example-title', 'Maximum 255 characters.');
+                                </script>
+                            </span>
+                            <apex:inputField style="width:500px; height:75px" value="{!SGAP_Professional_Service__c.inw_Professional_Services__c}" required="true"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Record Id</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="input-group col-md-3 col-md-offset-1 bs_text">
+                            <apex:outputLabel value="SGAP Professional Services Name"/>
+                            <apex:inputField style="width:500px; height:25px" value="{!SGAP_Professional_Service__c.Name}" required="true"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </apex:pageBlock>
+    </apex:form>
+    </div>
+</div>
+</apex:page>
