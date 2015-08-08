@@ -1,0 +1,15 @@
+<apex:page standardController="hhs__Service_Plan__c">
+    <apex:pageBlock title="Parent Educator Survey Results">
+        <apex:pageBlockTable value="{!hhs__Service_Plan__c.ECD_Assessments__r}"  var="PES">
+            <apex:column value="{!PES.inw_Assessment_Completed_Date__c}"/>
+            <apex:column value="{!PES.inw_pes_Enjoys_Child_Score__c}"/>
+            <apex:column value="{!PES.inw_pes_Sensitive_to_feelings_score__c}"/>
+            <apex:column value="{!PES.inw_pes_Uses_effective_firm_score__c}"/>
+            <apex:column value="{!PES.inw_pes_Responds_appropriately_Score__c}"/>
+            <apex:column value="{!PES.inw_pes_Adjusts_environment_Score__c}"/>
+            <apex:column value="{!PES.inw_pes_Engages_in_Score__c}"/>
+            <apex:column value="{!PES.inw_pes_Provides_encouragement_Score__c}"/>
+            <apex:column value="{!PES.inw_pes_Total_PES_Score__c}"/>
+        </apex:pageBlockTable>
+    </apex:pageBlock>
+</apex:page>
