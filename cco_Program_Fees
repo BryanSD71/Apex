@@ -1,0 +1,43 @@
+public class CSM_ctrl_Program_Fees_Invoice {
+
+    public id cSCDid;
+    public CSM_ctrl_Program_Fees_Invoice(ApexPages.StandardController controller) {
+        cSCDid = controller.getRecord().Id;
+    }
+
+    private Map<Id, Program_Fee__c> scdMap = new Map<Id, Program_Fee__c>();
+    private Map<Id, Paid_Fee__c> prfMap = new Map<Id, Paid_Fee__c>();
+    
+    public CSM_ctrl_Program_Fees_Invoice(){
+        
+        List<Service_Coordination__c> scdList = 
+            [SELECT scd.Id, scd.Name FROM Service_Coordination__c scd WHERE scd.id=:cSCDid];
+        
+        for(Service_Coordination__c s:scdList){
+            string scdId = s.Id;
+            Set<Id> programFees = new Set<Id>();
+            List<Program_Fee__c> prfList = [SELECT prf.Id, prf.Name 
+                                            FROM Program_Fee__c prf 
+                                            WHERE prf.Service_Coordination__c=:scdId];
+            for(Program_Fee__c pf:prfList){
+                string pfId = pf.Id;
+                programFees.add(pf.Id);
+                List<Paid_Fee__c> pdfList = [SELECT pdf.Id, pdf.Name 
+                                             FROM Paid_Fee__c pdf 
+                                             WHERE pdf.Program_Fee__c=:pfId];
+                Set<Id> paidFees = new Set<Id>();
+                for(Paid_Fee__c p:pdfList){
+                    paidFees.add(p.Id);
+                }
+//                prfMap.put(pf.Id, paidFees);
+            }
+//            scdMap.put(s.Id, programFees);
+        }
+    }
+    public map<Id, Program_Fee__c> getscdMap(){
+        return scdMap;
+    }
+    public map<Id, Paid_Fee__c> getprfMap(){
+        return prfMap;
+    }
+}
